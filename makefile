@@ -19,9 +19,9 @@ ifeq ($(platform),windows)
 	arch = i386
 endif
 
-root = $(HOME)/p
-base = $(root)/demo
-vm = $(root)/vm
+root = $(shell (cd .. && pwd))
+base = $(shell pwd)
+vm = $(root)/avian
 swt = $(root)/swt-3.3/$(platform)-$(arch)/swt.jar
 src = $(base)/src
 bld = $(base)/build/$(platform)-$(arch)-$(process)-$(mode)
@@ -64,10 +64,9 @@ cflags = $(common-cflags) \
 	-I$(JAVA_HOME)/include/linux \
 	-fvisibility=hidden -fPIC
 
-common-lflags = -lz -lssl -lcrypto -lm -lstdc++
+common-lflags = -lz -lm -lstdc++
 
-lflags = $(common-lflags) -rdynamic -lpthread -L/usr/X11R6/lib \
-	-lX11 -lXmu -lXdamage -lXfixes -lXtst -ljpeg
+lflags = $(common-lflags) -rdynamic -lpthread -ldl
 
 ifeq ($(arch),i386)
 	object-arch = i386
@@ -82,6 +81,7 @@ ifeq ($(platform),darwin)
 	strip = strip -S -x
 
 	so-suffix = .jnilib
+	binaryToMacho = $(vm-bld)/binaryToMacho
 endif
 
 ifeq ($(platform),windows)
@@ -95,8 +95,7 @@ ifeq ($(platform),windows)
 	so-suffix = .dll
 
 	cflags = $(common-cflags)
-	lflags = $(common-lflags) \
-		-Wl,--kill-at -mwindows -mconsole
+	lflags = $(common-lflags) -Wl,--kill-at -mwindows -mconsole
 endif
 
 ifeq ($(mode),debug)
@@ -121,7 +120,7 @@ cpps = $(src)/$(name).cpp
 objects = $(call cpp-objects,$(cpps),$(src),$(bld))
 
 jar-object = $(bld)/jar.o
-vm-lib = $(vm-bld)/libvm.a
+vm-lib = $(vm-bld)/libavian.a
 executable = $(bld)/$(name)
 
 properties = $(stage1)/properties.d
@@ -154,7 +153,7 @@ $(classes): $(javas)
 	@rm -rf $(stage1)
 	@mkdir -p $(stage1)
 	javac -d $(stage1) -sourcepath $(generated-src):$(src) \
-		-cp $(swt):$(nebula) -bootclasspath $(vm)/build/classpath $(javas)
+		-cp $(swt) -bootclasspath $(vm)/build/classpath $(javas)
 
 $(properties): $(classes)
 	cp $(examples)/examples_control.properties $(stage1)
@@ -179,7 +178,7 @@ $(jars): $(classes)
 	@touch $(@)
 
 $(bld)/$(name).jar: \
-		$(classes) $(properties) $(data) $(jars) $(vm-classes) $(hook-lib)
+		$(classes) $(properties) $(data) $(jars) $(vm-classes)
 	@mkdir -p $(dir $(bld)/tmp)
 ifdef proguard
 	java -jar $(proguard) \
@@ -194,8 +193,13 @@ else
 endif
 
 $(jar-object): $(bld)/$(name).jar
+ifeq ($(platform),darwin)
+	$(binaryToMacho) $(bld)/client.jar \
+		__binary_$(name)_jar_start __binary_$(name)_jar_size > $(@)
+else
 	(cd $(bld) && $(objcopy) -I binary $(name).jar \
 		 -O $(object-format) -B $(object-arch) $(@))
+endif
 
 $(bld)/%.o: $(src)/%.cpp
 	@mkdir -p $(dir $(@))
@@ -209,11 +213,6 @@ $(vm-objects): $(vm-lib)
 	@mkdir -p $(bld)/vm
 	(cd $(bld)/vm && ar x $(vm-lib))
 
-ifeq ($(platform),darwin)
-$(executable): $(objects) $(vm-objects)
-	$(cc) $(objects) $(bld)/vm/*.o $(lflags) -o $(@)	
-	$(strip) $(@)
-else
 $(executable): $(jar-object) $(objects) $(vm-objects)
 ifeq ($(platform),windows)
 	$(dlltool) -z $(@).def $(objects) $(bld)/vm/*
@@ -225,7 +224,6 @@ else
 endif
 	$(strip) $(@)
 	$(upx) $(@)
-endif
 
 .PHONY: clean
 clean:
