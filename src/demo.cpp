@@ -12,7 +12,6 @@
 #  define SYMBOL(x) _binary_demo_jar_##x
 #endif
 
-#ifndef __APPLE__
 extern "C" {
 
   extern const uint8_t SYMBOL(start)[];
@@ -26,6 +25,31 @@ extern "C" {
   }
 
 } // extern "C"
+
+#ifdef JNI_VERSION_1_6
+typedef struct JDK1_1InitArgs {
+    jint version;
+
+    char **properties;
+    jint checkSource;
+    jint nativeStackSize;
+    jint javaStackSize;
+    jint minHeapSize;
+    jint maxHeapSize;
+    jint verifyMode;
+    char *classpath;
+
+    jint (JNICALL *vfprintf)(FILE *fp, const char *format, va_list args);
+    void (JNICALL *exit)(jint code);
+    void (JNICALL *abort)(void);
+
+    jint enableClassGC;
+    jint enableVerboseGC;
+    jint disableAsyncGC;
+    jint verbose;
+    jboolean debugging;
+    jint debugPort;
+} JDK1_1InitArgs;
 #endif
 
 int
@@ -35,11 +59,7 @@ main(int ac, const char** av)
   vmArgs.version = 0x00010001;
   JNI_GetDefaultJavaVMInitArgs(&vmArgs);
 
-#ifdef __APPLE__
-  vmArgs.classpath = const_cast<char*>("demo.jar");
-#else
   vmArgs.classpath = const_cast<char*>("[demoJar]");
-#endif
 
   JavaVM* vm;
   void* env;
