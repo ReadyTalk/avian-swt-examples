@@ -30,9 +30,31 @@
    *** XErrorProc(...);
    *** XIOErrorProc(...);
    *** logProc(...);
+   *** EnumFontFamProc(...);
+   *** drawPatternProc(...);
+   *** axialShadingProc(...);
+   *** releaseProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.graphics.GC {
+   *** convertRgn(...);
+ }
+-keepclassmembers class org.eclipse.swt.graphics.Path {
+   *** newPathProc(...);
+   *** lineProc(...);
+   *** curveProc(...);
+   *** closePathProc(...);
+   *** applierFunc(...);
+ }
+-keepclassmembers class org.eclipse.swt.graphics.TextLayout {
+   *** regionToRects(...);
  }
 -keepclassmembers class org.eclipse.swt.browser.MozillaDelegate {
    *** eventProc(...);
+   *** eventProc3(...);
+ }
+-keepclassmembers class org.eclipse.swt.browser.Safari {
+   *** eventProc3(...);
+   *** eventProc7(...);
  }
 -keepclassmembers class org.eclipse.swt.printing.Printer {
    *** GtkPrinterFunc_List(...);
@@ -46,6 +68,7 @@
    *** DragGetData(...);
    *** DragEnd(...);
    *** DragDataDelete(...);
+   *** DragSendDataProc(...);
  }
 -keepclassmembers class org.eclipse.swt.dnd.ClipboardProxy {
    *** getFunc(...);
@@ -56,6 +79,14 @@
    *** Drag_Leave(...);
    *** Drag_Data_Received(...);
    *** Drag_Drop(...);
+   *** DragTrackingHandler(...);
+   *** DragReceiveHandler(...);
+ }
+-keepclassmembers class org.eclipse.swt.dnd.TableDropTargetEffect {
+   *** AcceptDragProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.dnd.TreeDropTargetEffect {
+   *** AcceptDragProc(...);
  }
 -keepclassmembers class org.eclipse.swt.internal.mozilla.XPCOMObject {
    <methods>;
@@ -84,6 +115,38 @@
    *** checkIfEventProc(...);
    *** idleProc(...);
    *** styleSetProc(...);
+   *** actionProc(...);
+   *** appleEventProc(...);
+   *** caretProc(...);
+   *** clockProc(...);
+   *** commandProc(...);
+   *** controlProc(...);
+   *** accessibilityProc(...);
+   *** drawItemProc(...);
+   *** itemCompareProc(...);
+   *** itemDataProc(...);
+   *** itemNotificationProc(...);
+   *** helpProc(...);
+   *** hitTestProc(...);
+   *** keyboardProc(...);
+   *** menuProc(...);
+   *** mouseHoverProc(...);
+   *** mouseProc(...);
+   *** timerProc(...);
+   *** trackingProc(...);
+   *** windowProc(...);
+   *** colorProc(...);
+   *** textInputProc(...);
+   *** appearanceProc(...);
+   *** trayItemProc(...);
+   *** observerProc(...);
+   *** sourceProc(...);
+   *** searchProc(...);
+   *** releaseDataProc(...);
+   *** coreEventProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.FontDialog {
+   *** fontProc(...);
  }
 -keepclassmembers class org.eclipse.swt.accessibility.AccessibleFactory {
    <methods>;
@@ -91,7 +154,48 @@
 -keepclassmembers class org.eclipse.swt.accessibility.AccessibleObject {
    <methods>;
  }
-
+-keepclassmembers class org.eclipse.swt.graphics.FontData {
+   *** EnumLocalesProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.internal.BidiUtil {
+   *** windowProc(...);
+   *** EnumSystemLanguageGroupsProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.internal.ole.win32.COMObject {
+   <methods>;
+ }
+-keepclassmembers class org.eclipse.swt.widgets.ColorDialog {
+   *** CCHookProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Tree {
+   *** CompareFunc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Tracker {
+   *** transparentProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Display {
+   *** monitorEnumProc(...);
+   *** embeddedProc(...);
+   *** windowProc(...);
+   *** messageProc(...);
+   *** msgFilterProc(...);
+   *** foregroundIdleProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Composite {
+   *** getMsgProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.FileDialog {
+   *** OFNHookProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Combo {
+   *** CBTProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.DirectoryDialog {
+   *** BrowseCallbackProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.ole.win32.OleFrame {
+   *** getMsgProc(...);
+ }
 
 # image file format parsing is done via reflection.
 

@@ -85,6 +85,9 @@ ifeq ($(platform),darwin)
 endif
 
 ifeq ($(platform),windows)
+	inc = $(root)/win32/include
+	lib = $(root)/win32/lib
+
 	object-format = pe-i386
 	cxx = i586-mingw32msvc-g++
 	cc = i586-mingw32msvc-gcc
@@ -94,8 +97,8 @@ ifeq ($(platform),windows)
 	so-prefix =
 	so-suffix = .dll
 
-	cflags = $(common-cflags)
-	lflags = $(common-lflags) -Wl,--kill-at -mwindows -mconsole
+	cflags = -I$(inc) $(common-cflags)
+	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows -mconsole
 endif
 
 ifeq ($(mode),debug)
