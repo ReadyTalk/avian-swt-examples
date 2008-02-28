@@ -92,7 +92,7 @@ ifeq ($(platform),windows)
 	so-suffix = .dll
 
 	cflags = -I$(inc) $(common-cflags)
-	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows -mconsole
+	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
 endif
 
 ifeq ($(mode),debug)
