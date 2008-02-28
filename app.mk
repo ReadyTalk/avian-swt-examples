@@ -125,7 +125,7 @@ vm-classes = $(stage1)/vm-classes.d
 vm-objects = $(bld)/vm-objects.d
 
 define make-vm
-	(cd $(vm) && \
+	(cd $(vm) && unset MAKEFLAGS && \
 	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform))
 endef
 
