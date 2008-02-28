@@ -4,7 +4,7 @@ graphics = org/eclipse/swt/examples/graphics
 paint = org/eclipse/swt/examples/paint
 
 .PHONY: build
-build: example
+build: example graphics paint
 
 .PHONY: example
 example:
