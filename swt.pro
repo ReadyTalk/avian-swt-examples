@@ -1,10 +1,3 @@
-# our entry point:
-
--keep class org.eclipse.swt.examples.controlexample.ControlExample {
-   public static void main(java.lang.String[]);
- }
-
-
 # many classes in SWT check package names in their constructors to
 # prevent subclassing by classes outside SWT.  Rather than list them
 # all here, we simply preserve all class names in SWT from

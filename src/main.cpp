@@ -6,10 +6,10 @@
 
 #ifdef __MINGW32__
 #  define EXPORT __declspec(dllexport)
-#  define SYMBOL(x) binary_demo_jar_##x
+#  define SYMBOL(x) binary_boot_jar_##x
 #else
 #  define EXPORT __attribute__ ((visibility("default")))
-#  define SYMBOL(x) _binary_demo_jar_##x
+#  define SYMBOL(x) _binary_boot_jar_##x
 #endif
 
 extern "C" {
@@ -18,7 +18,7 @@ extern "C" {
   extern const uint8_t SYMBOL(size)[];
 
   EXPORT const uint8_t*
-  demoJar(unsigned* size)
+  bootJar(unsigned* size)
   {
     *size = reinterpret_cast<uintptr_t>(SYMBOL(size));
     return SYMBOL(start);
@@ -59,7 +59,7 @@ main(int ac, const char** av)
   vmArgs.version = 0x00010001;
   JNI_GetDefaultJavaVMInitArgs(&vmArgs);
 
-  vmArgs.classpath = const_cast<char*>("[demoJar]");
+  vmArgs.classpath = const_cast<char*>("[bootJar]");
 
   JavaVM* vm;
   void* env;
