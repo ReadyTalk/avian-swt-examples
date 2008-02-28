@@ -69,7 +69,7 @@ endif
 
 ifeq ($(platform),darwin)
 	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
-	lflags = $(common-lflags) -ldl
+	lflags = $(common-lflags) -ldl -framework CoreFoundation
 	upx = :
 	strip = strip -S -x
 
