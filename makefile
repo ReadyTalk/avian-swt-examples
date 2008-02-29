@@ -27,7 +27,8 @@ graphics:
 		properties-file=$(examples)/examples_graphics.properties \
 		data-files="$(wildcard $(examples)/$(graphics)/*.png) \
 			$(wildcard $(examples)/$(graphics)/*.gif) \
-			$(wildcard $(examples)/$(graphics)/*.jpg)" \
+			$(wildcard $(examples)/$(graphics)/*.jpg) \
+			$(wildcard $(examples)/$(graphics)/*.bmp)" \
 		data-directory=$(graphics) \
 		sources="$(shell find $(examples)/$(graphics) -name '*.java')" \
 		source-directory=$(examples) \
