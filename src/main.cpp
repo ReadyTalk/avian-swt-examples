@@ -15,12 +15,12 @@
 extern "C" {
 
   extern const uint8_t SYMBOL(start)[];
-  extern const uint8_t SYMBOL(size)[];
+  extern const uint8_t SYMBOL(end)[];
 
   EXPORT const uint8_t*
   bootJar(unsigned* size)
   {
-    *size = reinterpret_cast<uintptr_t>(SYMBOL(size));
+    *size = SYMBOL(end) - SYMBOL(start);
     return SYMBOL(start);
   }
 
