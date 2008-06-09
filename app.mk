@@ -48,7 +48,7 @@ so-suffix = .so
 
 pointer-size = 8
 
-common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self -Wconversion \
+common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
 	-I$(JAVA_HOME)/include \
 	-fno-rtti -fno-exceptions \
 	-D__STDC_LIMIT_MACROS -D_JNI_IMPLEMENTATION_ -DMAIN_CLASS=\"$(main-class)\"
