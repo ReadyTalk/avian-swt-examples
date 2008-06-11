@@ -30,7 +30,7 @@ vm-bld = $(vm)/build/$(platform)-$(arch)-$(process)-$(mode)
 cxx = g++
 cc = gcc
 objcopy = objcopy
-proguard = $(root)/proguard4.1/lib/proguard.jar
+proguard = $(root)/proguard4.2/lib/proguard.jar
 
 ifeq ($(mode),fast)
 	upx = upx
