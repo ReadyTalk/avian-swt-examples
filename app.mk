@@ -75,7 +75,9 @@ ifeq ($(platform),darwin)
 
 	so-suffix = .jnilib
 	binaryToMacho = $(vm-bld)/binaryToMacho
+ifdef proguard
 	proguard += -dontusemixedcaseclassnames
+endif
 endif
 
 ifeq ($(platform),windows)
