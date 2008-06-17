@@ -210,3 +210,6 @@ else
 endif
 	$(strip) $(@)
 	$(upx) $(@)
+ifeq ($(platform),windows)
+	mv $(@) $(@).exe
+endif
