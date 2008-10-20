@@ -93,6 +93,7 @@ ifeq ($(platform),windows)
 		# Really need to just do nothing here
 		build-cflags = $(common-cflags) \
 			"-I$(JAVA_HOME)/include/win32" -I$(src) -mthreads
+		proguard += -dontusemixedcaseclassnames
 	else
 		cxx = i586-mingw32msvc-g++
 		cc = i586-mingw32msvc-gcc
