@@ -87,6 +87,7 @@
 -keepclassmembers class org.eclipse.swt.widgets.Display {
    *** fixedClassInitProc(...);
    *** fixedMapProc(...);
+   *** fixedSizeAllocateProc(...);
    *** rendererClassInitProc(...);
    *** rendererRenderProc(...);
    *** rendererGetSizeProc(...);
@@ -104,6 +105,7 @@
    *** treeSelectionProc(...);
    *** cellDataProc(...);
    *** setDirectionProc(...);
+   *** emissionProc(...);
    *** allChildrenProc(...);
    *** checkIfEventProc(...);
    *** idleProc(...);
