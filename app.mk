@@ -12,12 +12,12 @@ ifeq ($(platform),windows)
 	arch = i386
 endif
 
-root = $(shell (cd .. && pwd))
+root = ..
 base = $(shell pwd)
 vm = $(root)/avian
 swt = $(root)/swt-3.3/$(platform)-$(arch)/swt.jar
-src = $(base)/src
-bld = $(base)/build/$(platform)-$(arch)-$(process)-$(mode)/$(name)
+src = src
+bld = build/$(platform)-$(arch)-$(process)-$(mode)/$(name)
 stage1 = $(bld)/stage1
 stage2 = $(bld)/stage2
 vm-bld = $(vm)/build/$(platform)-$(arch)-$(process)-$(mode)
@@ -48,12 +48,12 @@ so-suffix = .so
 pointer-size = 8
 
 common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
-	"-I$(JAVA_HOME)/include" \
+	-I"$(JAVA_HOME)/include" \
 	-fno-rtti -fno-exceptions \
 	-D__STDC_LIMIT_MACROS -D_JNI_IMPLEMENTATION_ -DMAIN_CLASS=\"$(main-class)\"
 
 cflags = $(common-cflags) \
-	"-I$(JAVA_HOME)/include/linux" \
+	-I"$(JAVA_HOME)/include/linux" \
 	-fvisibility=hidden -fPIC
 
 common-lflags = -lz -lm -lstdc++
@@ -92,7 +92,7 @@ ifeq ($(platform),windows)
 	ifeq ($(build-platform),windows)
 		# Really need to just do nothing here
 		build-cflags = $(common-cflags) \
-			"-I$(JAVA_HOME)/include/win32" -I$(src) -mthreads
+			-I"$(JAVA_HOME)/include/win32" -I$(src) -mthreads
 		proguard += -dontusemixedcaseclassnames
 	else
 		cxx = i586-mingw32msvc-g++
@@ -138,6 +138,7 @@ vm-objects = $(bld)/vm-objects.d
 define make-vm
 	(cd $(vm) && unset MAKEFLAGS && \
 	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform))
+	cd "$(base)"
 endef
 
 ## targets ####################################################################
@@ -166,7 +167,7 @@ $(vm-classes): $(classes)
 	@touch $(@)
 
 $(jars): $(classes)
-	(cd $(stage1) && $(jar) xf $(swt))
+	(cd $(stage1) && $(jar) xf "$(base)/$(swt)")
 	rm -r $(stage1)/org/eclipse/swt/awt
 	@touch $(@)
 
@@ -179,13 +180,13 @@ ifdef proguard
 		-outjars $(stage2) \
 		-printmapping $(bld)/mapping.txt \
 		-include $(vm)/vm.pro \
-		-include $(base)/swt.pro \
+		-include swt.pro \
 		-keep class $(main-class) \{ \
 			public static void 'main(java.lang.String[]);' \
 		\}
-	(cd $(stage2) && $(jar) c0f "$(@)" .)
+	($(jar) c0f "$(@)" -C $(stage2) .)
 else
-	(cd $(stage1) && $(jar) c0f "$(@)" .)
+	($(jar) c0f "$(@)" -C $(stage1) .)
 endif
 
 $(jar-object): $(bld)/boot.jar
@@ -194,7 +195,9 @@ ifeq ($(platform),darwin)
 		__binary_boot_jar_start __binary_boot_jar_end > $(@)
 else
 	(cd $(bld) && $(objcopy) -I binary boot.jar \
-		 -O $(object-format) -B $(object-arch) "$(@)")
+		 -O $(object-format) -B $(object-arch) "$(base)/$(@)")
+
+	cd "$(base)"
 endif
 
 $(bld)/%.o: $(src)/%.cpp
@@ -207,7 +210,7 @@ $(vm-lib):
 $(vm-objects): $(vm-lib)
 	$(make-vm)
 	@mkdir -p $(bld)/vm
-	(cd $(bld)/vm && ar x $(vm-lib))
+	(cd $(bld)/vm && ar x "$(base)/$(vm-lib)")
 
 $(executable): $(jar-object) $(objects) $(vm-objects)
 ifeq ($(platform),windows)
