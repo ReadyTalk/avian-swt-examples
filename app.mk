@@ -191,7 +191,7 @@ endif
 
 $(jar-object): $(bld)/boot.jar
 ifeq ($(platform),darwin)
-	$(binaryToMacho) $(bld)/boot.jar \
+	$(binaryToMacho) $(bld)/boot.jar __TEXT __text \
 		__binary_boot_jar_start __binary_boot_jar_end > $(@)
 else
 	(cd $(bld) && $(objcopy) -I binary boot.jar \
