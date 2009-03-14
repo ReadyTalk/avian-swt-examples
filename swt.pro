@@ -85,60 +85,62 @@
    <methods>;
  }
 -keepclassmembers class org.eclipse.swt.widgets.Display {
+   *** accessibilityProc(...);
+   *** actionProc(...);
+   *** allChildrenProc(...);
+   *** appearanceProc(...);
+   *** appleEventProc(...);
+   *** caretProc(...);
+   *** cellDataProc(...);
+   *** checkIfEventProc(...);
+   *** clockProc(...);
+   *** colorProc(...);
+   *** commandProc(...);
+   *** controlProc(...);
+   *** coreEventProc(...);
+   *** drawItemProc(...);
+   *** embeddedProc(...);
+   *** emissionProc(...);
+   *** eventProc(...);
+   *** filterProc(...);
    *** fixedClassInitProc(...);
    *** fixedMapProc(...);
    *** fixedSizeAllocateProc(...);
-   *** rendererClassInitProc(...);
-   *** rendererRenderProc(...);
-   *** rendererGetSizeProc(...);
-   *** eventProc(...);
-   *** filterProc(...);
-   *** windowProc(...);
-   *** timerProc(...);
-   *** windowTimerProc(...);
-   *** mouseHoverProc(...);
-   *** caretProc(...);
-   *** menuPositionProc(...);
-   *** sizeAllocateProc(...);
-   *** sizeRequestProc(...);
-   *** shellMapProc(...);
-   *** treeSelectionProc(...);
-   *** cellDataProc(...);
-   *** setDirectionProc(...);
-   *** emissionProc(...);
-   *** allChildrenProc(...);
-   *** checkIfEventProc(...);
+   *** foregroundIdleProc(...);
+   *** helpProc(...);
+   *** hitTestProc(...);
    *** idleProc(...);
-   *** styleSetProc(...);
-   *** actionProc(...);
-   *** appleEventProc(...);
-   *** caretProc(...);
-   *** clockProc(...);
-   *** commandProc(...);
-   *** controlProc(...);
-   *** accessibilityProc(...);
-   *** drawItemProc(...);
    *** itemCompareProc(...);
    *** itemDataProc(...);
    *** itemNotificationProc(...);
-   *** helpProc(...);
-   *** hitTestProc(...);
    *** keyboardProc(...);
+   *** menuPositionProc(...);
    *** menuProc(...);
+   *** messageProc(...);
+   *** monitorEnumProc(...);
    *** mouseHoverProc(...);
    *** mouseProc(...);
+   *** msgFilterProc(...);
+   *** observerProc(...);
+   *** pollingProc(...);
+   *** releaseDataProc(...);
+   *** rendererClassInitProc(...);
+   *** rendererGetSizeProc(...);
+   *** rendererRenderProc(...);
+   *** searchProc(...);
+   *** setDirectionProc(...);
+   *** shellMapProc(...);
+   *** sizeAllocateProc(...);
+   *** sizeRequestProc(...);
+   *** sourceProc(...);
+   *** styleSetProc(...);
+   *** textInputProc(...);
    *** timerProc(...);
    *** trackingProc(...);
-   *** windowProc(...);
-   *** colorProc(...);
-   *** textInputProc(...);
-   *** appearanceProc(...);
    *** trayItemProc(...);
-   *** observerProc(...);
-   *** sourceProc(...);
-   *** searchProc(...);
-   *** releaseDataProc(...);
-   *** coreEventProc(...);
+   *** treeSelectionProc(...);
+   *** windowProc(...);
+   *** windowTimerProc(...);
  }
 -keepclassmembers class org.eclipse.swt.widgets.FontDialog {
    *** fontProc(...);
@@ -181,6 +183,8 @@
  }
 -keepclassmembers class org.eclipse.swt.widgets.FileDialog {
    *** OFNHookProc(...);
+   *** filterProc(...);
+   *** eventProc(...);
  }
 -keepclassmembers class org.eclipse.swt.widgets.Combo {
    *** CBTProc(...);
@@ -206,3 +210,6 @@
 -overloadaggressively
 -dontpreverify
 #-dontobfuscate
+
+# ignore complaints about missing classes which we never actually use:
+-ignorewarnings
