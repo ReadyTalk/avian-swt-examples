@@ -381,7 +381,8 @@ public class PaintSurface {
 		if (image == null) return;
 		if (imageWidth > visibleWidth) {
 			final int oldOffset = displayFDC.xOffset;
-			final int newOffset = Math.min(scrollBar.getSelection(), imageWidth - visibleWidth);
+			int newOffset = Math.min(scrollBar.getSelection(), imageWidth - visibleWidth);
+                        if (newOffset < 0) newOffset = 0;
 			if (oldOffset != newOffset) {
 				paintCanvas.update();
 				displayFDC.xOffset = newOffset;
@@ -400,7 +401,8 @@ public class PaintSurface {
 		if (image == null) return;
 		if (imageHeight > visibleHeight) {
 			final int oldOffset = displayFDC.yOffset;
-			final int newOffset = Math.min(scrollBar.getSelection(), imageHeight - visibleHeight);
+			int newOffset = Math.min(scrollBar.getSelection(), imageHeight - visibleHeight);
+                        if (newOffset < 0) newOffset = 0;
 			if (oldOffset != newOffset) {
 				paintCanvas.update();
 				displayFDC.yOffset = newOffset;
@@ -423,6 +425,7 @@ public class PaintSurface {
 		ScrollBar horizontal = paintCanvas.getHorizontalBar();
 		if (horizontal != null) {
 			displayFDC.xOffset = Math.min(horizontal.getSelection(), imageWidth - visibleWidth);
+                        if (displayFDC.xOffset < 0) displayFDC.xOffset = 0;
 			if (imageWidth <= visibleWidth) {
 				horizontal.setEnabled(false);
 				horizontal.setSelection(0);
@@ -436,7 +439,8 @@ public class PaintSurface {
 		ScrollBar vertical = paintCanvas.getVerticalBar();
 		if (vertical != null) {
 			displayFDC.yOffset = Math.min(vertical.getSelection(), imageHeight - visibleHeight);
-			if (imageHeight <= visibleHeight) {
+                        if (displayFDC.yOffset < 0) displayFDC.yOffset = 0;
+                        if (imageHeight <= visibleHeight) {
 				vertical.setEnabled(false);
 				vertical.setSelection(0);
 			} else {
