@@ -1,32 +1,59 @@
-build-arch = $(shell uname -m | sed 's/^i.86$$/i386/')
+build-arch = $(shell uname -m)
+ifeq ($(build-arch),i586)
+	build-arch = i386
+endif
+ifeq ($(build-arch),i686)
+	build-arch = i386
+endif
+ifeq ('$(build-arch)','Power Macintosh')
+	build-arch = powerpc
+endif
+
+build-platform = $(shell uname -s | tr [:upper:] [:lower:])
 
 build-platform = \
-	$(shell uname -s | tr [:upper:] [:lower:] | sed 's/^mingw32.*$$/windows/')
+	$(shell uname -s | tr [:upper:] [:lower:] \
+		| sed 's/^mingw32.*$$/mingw32/' \
+		| sed 's/^cygwin.*$$/cygwin/')
 
 arch = $(build-arch)
-platform = $(build-platform)
-mode = fast
-process = compile
+platform = $(subst cygwin,windows,$(subst mingw32,windows,$(build-platform)))
 
 ifeq ($(platform),windows)
 	arch = i386
 endif
 
+mode = fast
+process = compile
+
+ifneq ($(process),compile)
+	options := -$(process)
+endif
+ifneq ($(mode),fast)
+	options := $(options)-$(mode)
+endif
+ifeq ($(bootimage),true)
+	options := $(options)-bootimage
+endif
+ifeq ($(heapdump),true)
+	options := $(options)-heapdump
+endif
+
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
-swt = $(root)/swt-3.3/$(platform)-$(arch)/swt.jar
+swt = $(root)/swt-3.4/$(platform)-$(arch)/swt.jar
 src = src
-bld = build/$(platform)-$(arch)-$(process)-$(mode)/$(name)
+bld = build/$(platform)-$(arch)$(options)/$(name)
 stage1 = $(bld)/stage1
 stage2 = $(bld)/stage2
-vm-bld = $(vm)/build/$(platform)-$(arch)-$(process)-$(mode)
+vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 
 cxx = g++
 cc = gcc
 dlltool = dlltool
 objcopy = objcopy
-proguard = $(root)/proguard4.2/lib/proguard.jar
+proguard = $(root)/proguard4.3/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
@@ -47,6 +74,8 @@ so-suffix = .so
 
 pointer-size = 8
 
+asm = x86
+
 common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
 	-I"$(JAVA_HOME)/include" \
 	-fno-rtti -fno-exceptions \
@@ -63,6 +92,12 @@ lflags = $(common-lflags) -rdynamic -lpthread -ldl
 ifeq ($(arch),i386)
 	object-arch = i386
 	object-format = elf32-i386
+	pointer-size = 4
+endif
+ifeq ($(arch),powerpc)
+	asm = powerpc
+	object-arch = powerpc
+	object-format = elf32-powerpc
 	pointer-size = 4
 endif
 
@@ -191,7 +226,7 @@ endif
 
 $(jar-object): $(bld)/boot.jar
 ifeq ($(platform),darwin)
-	$(binaryToMacho) $(bld)/boot.jar __TEXT __text \
+	$(binaryToMacho) $(asm) $(bld)/boot.jar __TEXT __text \
 		__binary_boot_jar_start __binary_boot_jar_end > $(@)
 else
 	(cd $(bld) && $(objcopy) -I binary boot.jar \
