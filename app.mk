@@ -19,10 +19,6 @@ build-platform = \
 arch = $(build-arch)
 platform = $(subst cygwin,windows,$(subst mingw32,windows,$(build-platform)))
 
-ifeq ($(platform),windows)
-	arch = i386
-endif
-
 mode = fast
 process = compile
 
@@ -53,10 +49,12 @@ cxx = g++
 cc = gcc
 dlltool = dlltool
 objcopy = objcopy
-proguard = $(root)/proguard4.3/lib/proguard.jar
+proguard = $(root)/proguard4.4/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
+
+converter = $(vm-bld)/binaryToObject
 
 ifeq ($(mode),fast)
 	upx = upx
@@ -65,9 +63,6 @@ else
 	upx = :
 	strip = :
 endif
-
-object-arch = i386:x86-64
-object-format = elf64-x86-64
 
 so-prefix = lib
 so-suffix = .so
@@ -90,14 +85,10 @@ common-lflags = -lz -lm -lstdc++
 lflags = $(common-lflags) -rdynamic -lpthread -ldl
 
 ifeq ($(arch),i386)
-	object-arch = i386
-	object-format = elf32-i386
 	pointer-size = 4
 endif
 ifeq ($(arch),powerpc)
 	asm = powerpc
-	object-arch = powerpc
-	object-format = elf32-powerpc
 	pointer-size = 4
 endif
 
@@ -108,7 +99,6 @@ ifeq ($(platform),darwin)
 	strip = strip -S -x
 
 	so-suffix = .jnilib
-	binaryToMacho = $(vm-bld)/binaryToMacho
 ifdef proguard
 	proguard += -dontusemixedcaseclassnames
 endif
@@ -117,8 +107,6 @@ endif
 ifeq ($(platform),windows)
 	inc = "$(root)/win32/include"
 	lib = "$(root)/win32/lib"
-
-	object-format = pe-i386
 
 	so-prefix =
 	so-suffix = .dll
@@ -138,6 +126,25 @@ ifeq ($(platform),windows)
 
 	cflags = -I$(inc) $(common-cflags)
 	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
+
+	ifeq ($(arch),x86_64)
+		wine-include-flags =
+		upx = :
+
+		cxx = x86_64-w64-mingw32-g++
+		cc = x86_64-w64-mingw32-gcc
+		dlltool = x86_64-w64-mingw32-dlltool
+		ar = x86_64-w64-mingw32-ar
+		ranlib = x86_64-w64-mingw32-ranlib
+		restool = x86_64-w64-mingw32-windres
+		strip = x86_64-w64-mingw32-strip --strip-all
+		inc = "$(root)/win64/include"
+		lib = "$(root)/win64/lib"
+
+		lflags = -Wl,--as-needed -L$(lib) $(common-lflags) \
+			-lws2_32 -lversion -lpsapi -lz -ljpeg -lole32 -lurlmon -luuid \
+			-lwininet -mwindows
+	endif
 endif
 
 ifeq ($(mode),debug)
@@ -225,15 +232,8 @@ else
 endif
 
 $(jar-object): $(bld)/boot.jar
-ifeq ($(platform),darwin)
-	$(binaryToMacho) $(asm) $(bld)/boot.jar __TEXT __text \
-		__binary_boot_jar_start __binary_boot_jar_end > $(@)
-else
-	(cd $(bld) && $(objcopy) -I binary boot.jar \
-		 -O $(object-format) -B $(object-arch) "$(base)/$(@)")
-
-	cd "$(base)"
-endif
+	$(converter) $(<) $(@) _binary_boot_jar_start \
+		_binary_boot_jar_end $(platform) $(arch)
 
 $(bld)/%.o: $(src)/%.cpp
 	@mkdir -p $(dir $(@))
