@@ -94,9 +94,17 @@ endif
 
 ifeq ($(platform),darwin)
 	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
-	lflags = $(common-lflags) -ldl -framework CoreFoundation
+	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
 	upx = :
 	strip = strip -S -x
+
+	ifeq ($(arch),powerpc)
+		cross-flags := $(cross-flags) -arch ppc
+	endif
+
+	ifeq ($(arch),i386)
+		cross-flags := $(cross-flags) -arch i386
+	endif
 
 	so-suffix = .jnilib
 ifdef proguard
@@ -155,6 +163,11 @@ ifeq ($(mode),debug-fast)
 endif
 ifeq ($(mode),fast)
 	opt = -O3 -g3 -DNDEBUG
+endif
+
+ifdef cross-flags
+	cc := $(cc) $(cross-flags)
+	cxx := $(cxx) $(cross-flags)
 endif
 
 cflags += $(opt)
