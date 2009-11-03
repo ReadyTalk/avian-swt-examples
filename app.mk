@@ -38,7 +38,7 @@ endif
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
-swt = $(root)/swt-3.4/$(platform)-$(arch)/swt.jar
+swt = $(root)/swt-3.5/$(platform)-$(arch)/swt.jar
 src = src
 bld = build/$(platform)-$(arch)$(options)/$(name)
 stage1 = $(bld)/stage1
