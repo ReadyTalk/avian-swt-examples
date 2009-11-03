@@ -142,6 +142,10 @@
    *** windowProc(...);
    *** windowTimerProc(...);
    *** pangoLayoutNewProc(...);
+   *** applicationProc(...);
+   *** dialogProc(...);
+   *** fieldEditorProc(...);
+   *** cursorSetProc(...);
  }
 -keepclassmembers class org.eclipse.swt.widgets.FontDialog {
    *** fontProc(...);
