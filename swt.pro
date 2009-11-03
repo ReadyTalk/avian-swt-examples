@@ -141,6 +141,7 @@
    *** treeSelectionProc(...);
    *** windowProc(...);
    *** windowTimerProc(...);
+   *** pangoLayoutNewProc(...);
  }
 -keepclassmembers class org.eclipse.swt.widgets.FontDialog {
    *** fontProc(...);
