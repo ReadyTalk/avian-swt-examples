@@ -41,6 +41,10 @@
 -keepclassmembers class org.eclipse.swt.graphics.TextLayout {
    *** regionToRects(...);
  }
+-keepclassmembers class org.eclipse.swt.graphics.Region {
+   *** regionToRects(...);
+   *** convertRgn(...);
+ }
 -keepclassmembers class org.eclipse.swt.browser.MozillaDelegate {
    *** eventProc(...);
    *** eventProc3(...);
@@ -83,6 +87,9 @@
  }
 -keepclassmembers class org.eclipse.swt.internal.mozilla.XPCOMObject {
    <methods>;
+ }
+-keepclassmembers class org.eclipse.swt.widgets.Control {
+   *** regionToRects(...);
  }
 -keepclassmembers class org.eclipse.swt.widgets.Display {
    *** accessibilityProc(...);
