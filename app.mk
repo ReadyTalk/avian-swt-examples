@@ -93,6 +93,11 @@ ifeq ($(arch),powerpc)
 endif
 
 ifeq ($(platform),darwin)
+	ifneq ($(arch),x86_64)
+# SWT >= 3.5 only works on OS X 10.5 and above, so we use 3.4 instead
+		swt = $(root)/swt-3.4/$(platform)-$(arch)/swt.jar
+	endif
+
 	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
 	upx = :
