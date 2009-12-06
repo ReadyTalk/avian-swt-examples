@@ -104,11 +104,11 @@ ifeq ($(platform),darwin)
 	strip = strip -S -x
 
 	ifeq ($(arch),powerpc)
-		cross-flags := $(cross-flags) -arch ppc
+		cross-flags := -mmacosx-version-min=10.4 -arch ppc
 	endif
 
 	ifeq ($(arch),i386)
-		cross-flags := $(cross-flags) -arch i386
+		cross-flags := -mmacosx-version-min=10.4 -arch i386
 	endif
 
 	so-suffix = .jnilib
@@ -126,7 +126,7 @@ ifeq ($(platform),windows)
 	exe-suffix = .exe
 
 	ifeq ($(build-platform),windows)
-		# Really need to just do nothing here
+# Really need to just do nothing here
 		build-cflags = $(common-cflags) \
 			-I"$(JAVA_HOME)/include/win32" -I$(src) -mthreads
 		proguard += -dontusemixedcaseclassnames
