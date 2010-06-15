@@ -48,7 +48,6 @@ vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 cxx = g++
 cc = gcc
 dlltool = dlltool
-objcopy = objcopy
 proguard = $(root)/proguard4.4/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
@@ -84,6 +83,8 @@ common-lflags = -lz -lm -lstdc++
 
 lflags = $(common-lflags) -rdynamic -lpthread -ldl
 
+native-path = echo
+
 ifeq ($(arch),i386)
 	pointer-size = 4
 endif
@@ -112,9 +113,9 @@ ifeq ($(platform),darwin)
 	endif
 
 	so-suffix = .jnilib
-ifdef proguard
-	proguard += -dontusemixedcaseclassnames
-endif
+	ifdef proguard
+		proguard += -dontusemixedcaseclassnames
+	endif
 endif
 
 ifeq ($(platform),windows)
@@ -125,20 +126,30 @@ ifeq ($(platform),windows)
 	so-suffix = .dll
 	exe-suffix = .exe
 
-	ifeq ($(build-platform),windows)
-# Really need to just do nothing here
-		build-cflags = $(common-cflags) \
-			-I"$(JAVA_HOME)/include/win32" -I$(src) -mthreads
-		proguard += -dontusemixedcaseclassnames
-	else
+	cflags = -I$(inc) $(common-cflags)
+	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
+
+	ifeq (,$(filter mingw32 cygwin,$(build-platform)))
 		cxx = i586-mingw32msvc-g++
 		cc = i586-mingw32msvc-gcc
 		dlltool = i586-mingw32msvc-dlltool
-		objcopy = i586-mingw32msvc-objcopy
+		ar = i586-mingw32msvc-ar
+		ranlib = i586-mingw32msvc-ranlib
+		strip = i586-mingw32msvc-strip
+	else
+		common-cflags += "-I$(JAVA_HOME)/include/win32"
+		build-cflags = $(common-cflags) -I$(src) -mthreads
+		ifdef proguard
+			proguard += -dontusemixedcaseclassnames
+		endif
+		ifeq ($(build-platform),cygwin)
+			build-lflags += -mno-cygwin
+			build-cflags += -mno-cygwin
+			lflags += -mno-cygwin
+			cflags += -mno-cygwin
+			native-path = cygpath -m
+		endif
 	endif
-
-	cflags = -I$(inc) $(common-cflags)
-	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
 
 	ifeq ($(arch),x86_64)
 		wine-include-flags =
@@ -227,7 +238,7 @@ $(vm-classes): $(classes)
 	@touch $(@)
 
 $(jars): $(classes)
-	(cd $(stage1) && $(jar) xf "$(base)/$(swt)")
+	(cd $(stage1) && $(jar) xf "$$($(native-path) "$(base)/$(swt)")")
 	rm -r $(stage1)/org/eclipse/swt/awt
 	@touch $(@)
 
