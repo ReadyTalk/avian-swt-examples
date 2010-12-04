@@ -37,7 +37,7 @@ main(int ac, const char** av)
   JavaVMOption options[vmArgs.nOptions];
   vmArgs.options = options;
 
-  options[0].optionString = const_cast<char*>("-Djava.class.path=[bootJar]");
+  options[0].optionString = const_cast<char*>("-Xbootclasspath:[bootJar]");
 
   JavaVM* vm;
   void* env;

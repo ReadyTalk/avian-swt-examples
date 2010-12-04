@@ -1,11 +1,5 @@
-build-arch = $(shell uname -m)
-ifeq ($(build-arch),i586)
-	build-arch = i386
-endif
-ifeq ($(build-arch),i686)
-	build-arch = i386
-endif
-ifeq ('$(build-arch)','Power Macintosh')
+build-arch := $(shell uname -m | sed 's/^i.86$$/i386/' | sed 's/^arm.*$$/arm/')
+ifeq (Power,$(filter Power,$(build-arch)))
 	build-arch = powerpc
 endif
 
@@ -38,7 +32,7 @@ endif
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
-swt = $(root)/swt-3.5/$(platform)-$(arch)/swt.jar
+swt = $(root)/swt-3.6/$(platform)-$(arch)/swt.jar
 src = src
 bld = build/$(platform)-$(arch)$(options)/$(name)
 stage1 = $(bld)/stage1
@@ -68,8 +62,6 @@ so-suffix = .so
 
 pointer-size = 8
 
-asm = x86
-
 common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
 	-I"$(JAVA_HOME)/include" \
 	-fno-rtti -fno-exceptions \
@@ -89,8 +81,18 @@ ifeq ($(arch),i386)
 	pointer-size = 4
 endif
 ifeq ($(arch),powerpc)
-	asm = powerpc
 	pointer-size = 4
+endif
+ifeq ($(arch),arm)
+	pointer-size = 4
+
+  ifneq ($(arch),$(build-arch))
+    cxx = arm-linux-gnueabi-g++
+    cc = arm-linux-gnueabi-gcc
+    ar = arm-linux-gnueabi-ar
+    ranlib = arm-linux-gnueabi-ranlib
+    strip = arm-linux-gnueabi-strip
+  endif
 endif
 
 ifeq ($(platform),darwin)
@@ -173,9 +175,11 @@ endif
 
 ifeq ($(mode),debug)
 	opt = -O0 -g3
+	strip = :
 endif
 ifeq ($(mode),debug-fast)
 	opt = -O0 -g3 -DNDEBUG
+	strip = :
 endif
 ifeq ($(mode),fast)
 	opt = -O3 -g3 -DNDEBUG
@@ -217,12 +221,11 @@ endef
 .PHONY: build
 build: $(executable)
 
-$(classes): $(sources)
+$(classes): $(sources) $(jars)
 	$(make-vm)
-	@rm -rf $(stage1)
 	@mkdir -p $(stage1)
 	$(javac) -d $(stage1) -sourcepath $(src) \
-		-cp $(swt) -bootclasspath $(vm)/build/classpath $(sources)
+		-cp $(swt) -bootclasspath $(vm-bld)/classpath $(sources)
 
 $(properties): $(classes)
 	cp $(properties-file) $(stage1)
@@ -234,10 +237,11 @@ $(data): $(classes)
 	@touch $(@)
 
 $(vm-classes): $(classes)
-	cp -r $(vm)/build/classpath/* $(stage1)
+	cp -r $(vm-bld)/classpath/* $(stage1)
 	@touch $(@)
 
-$(jars): $(classes)
+$(jars):
+	@mkdir -p $(stage1)
 	(cd $(stage1) && $(jar) xf "$$($(native-path) "$(base)/$(swt)")")
 	rm -r $(stage1)/org/eclipse/swt/awt
 	@touch $(@)
