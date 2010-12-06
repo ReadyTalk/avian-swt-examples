@@ -29,6 +29,24 @@ ifeq ($(heapdump),true)
 	options := $(options)-heapdump
 endif
 
+proguard-flags = \
+	-renamesourcefileattribute SourceFile \
+  -keepattributes SourceFile,LineNumberTable
+
+ifneq ($(openjdk),)
+	ifneq ($(openjdk-src),)
+	  options := $(options)-openjdk-src
+	else
+		options := $(options)-openjdk
+	endif
+
+	proguard-flags += \
+		-include $(vm)/openjdk.pro \
+		-ignorewarnings
+else
+	proguard-flags += -overloadaggressively	
+endif
+
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
@@ -42,7 +60,7 @@ vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 cxx = g++
 cc = gcc
 dlltool = dlltool
-proguard = $(root)/proguard4.4/lib/proguard.jar
+proguard = $(root)/proguard4.6beta1/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
@@ -50,7 +68,7 @@ jar = "$(JAVA_HOME)/bin/jar"
 converter = $(vm-bld)/binaryToObject
 
 ifeq ($(mode),fast)
-	upx = upx
+	upx = upx --best --lzma
 	strip = strip --strip-all
 else
 	upx = :
@@ -212,7 +230,8 @@ vm-objects = $(bld)/vm-objects.d
 
 define make-vm
 	(cd $(vm) && unset MAKEFLAGS && \
-	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform))
+	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform) \
+		 "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)")
 	cd "$(base)"
 endef
 
@@ -256,6 +275,7 @@ ifdef proguard
 		-printmapping $(bld)/mapping.txt \
 		-include $(vm)/vm.pro \
 		-include swt.pro \
+		$(proguard-flags) \
 		-keep class $(main-class) \{ \
 			public static void 'main(java.lang.String[]);' \
 		\}

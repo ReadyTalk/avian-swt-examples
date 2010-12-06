@@ -137,6 +137,7 @@
    *** searchProc(...);
    *** setDirectionProc(...);
    *** shellMapProc(...);
+   *** signalProc(...);
    *** sizeAllocateProc(...);
    *** sizeRequestProc(...);
    *** sourceProc(...);
@@ -219,7 +220,6 @@
 
 -repackageclasses ''
 -allowaccessmodification
--overloadaggressively
 -dontpreverify
 #-dontobfuscate
 
