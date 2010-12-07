@@ -45,6 +45,13 @@ paint:
 		source-directory=$(examples) \
 		main-class=org.eclipse.swt.examples.paint.PaintExample
 
+.PHONY: tarball
+tarball:
+	@echo "creating build/avian-swt-examples-$(version).tar.bz2"
+	@mkdir -p build
+	(cd .. && tar --exclude=build --exclude='.*' --exclude='*~' -cjf \
+		avian/build/avian-swt-examples-$(version).tar.bz2 avian-swt-examples)
+
 .PHONY: clean
 clean:
 	rm -rf build

@@ -47,18 +47,36 @@ else
 	proguard-flags += -overloadaggressively	
 endif
 
+ifneq (,$(full-platform))
+	platform = $(word 1,$(subst -, ,$(full-platform)))
+	arch = $(word 2,$(subst -, ,$(full-platform)))
+	subplatform = $(word 3,$(subst -, ,$(full-platform)))
+else
+	full-platform = $(platform)-$(arch)
+endif
+
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
-swt = $(root)/swt-3.6/$(platform)-$(arch)/swt.jar
+swt = $(root)/swt/$(full-platform)/swt.jar
 src = src
-bld = build/$(platform)-$(arch)$(options)/$(name)
+bld = build/$(full-platform)$(options)/$(name)
 stage1 = $(bld)/stage1
 stage2 = $(bld)/stage2
 vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 
-cxx = g++
-cc = gcc
+ifneq ($(platform),darwin)
+	ifeq ($(arch),i386)
+		mflag = -m32
+	endif
+	ifeq ($(arch),x86_64)
+		mflag = -m64
+	endif
+endif
+
+cxx = g++ $(mflag)
+cc = gcc $(mflag)
+
 dlltool = dlltool
 proguard = $(root)/proguard4.6beta1/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
@@ -114,11 +132,6 @@ ifeq ($(arch),arm)
 endif
 
 ifeq ($(platform),darwin)
-	ifneq ($(arch),x86_64)
-# SWT >= 3.5 only works on OS X 10.5 and above, so we use 3.4 instead
-		swt = $(root)/swt-3.4/$(platform)-$(arch)/swt.jar
-	endif
-
 	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
 	upx = :
