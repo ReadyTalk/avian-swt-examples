@@ -121,6 +121,7 @@
    *** itemDataProc(...);
    *** itemNotificationProc(...);
    *** keyboardProc(...);
+   *** launcherProc(...);
    *** menuPositionProc(...);
    *** menuProc(...);
    *** messageProc(...);
