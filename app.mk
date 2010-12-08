@@ -30,6 +30,7 @@ ifeq ($(heapdump),true)
 endif
 
 proguard-flags = \
+	$(extra-proguard-flags) \
 	-renamesourcefileattribute SourceFile \
   -keepattributes SourceFile,LineNumberTable
 
@@ -40,9 +41,7 @@ ifneq ($(openjdk),)
 		options := $(options)-openjdk
 	endif
 
-	proguard-flags += \
-		-include $(vm)/openjdk.pro \
-		-ignorewarnings
+	proguard-flags += -include $(vm)/openjdk.pro
 else
 	proguard-flags += -overloadaggressively	
 endif

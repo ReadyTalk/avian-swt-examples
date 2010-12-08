@@ -10,6 +10,7 @@ build: example graphics paint
 example:
 	make -f app.mk \
 		name=example \
+		extra-proguard-flags="-include swt-browser.pro" \
 		properties-file=$(examples)/examples_control.properties \
 		data-files="$(wildcard $(examples)/$(controlexample)/*.png) \
 			$(wildcard $(examples)/$(controlexample)/*.gif) \
