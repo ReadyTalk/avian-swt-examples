@@ -12,6 +12,10 @@
 #  define SYMBOL(x) _binary_boot_jar_##x
 #endif
 
+// since we aren't linking against libstdc++, we must implement this
+// ourselves:
+extern "C" void __cxa_pure_virtual(void) { abort(); }
+
 extern "C" {
 
   extern const uint8_t SYMBOL(start)[];
