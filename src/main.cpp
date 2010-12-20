@@ -6,9 +6,13 @@
 
 #ifdef __MINGW32__
 #  define EXPORT __declspec(dllexport)
-#  define SYMBOL(x) binary_boot_jar_##x
 #else
 #  define EXPORT __attribute__ ((visibility("default")))
+#endif
+
+#if defined __MINGW32__ && ! defined __x86_64__
+#  define SYMBOL(x) binary_boot_jar_##x
+#else
 #  define SYMBOL(x) _binary_boot_jar_##x
 #endif
 
