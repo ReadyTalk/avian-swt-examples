@@ -1,9 +1,11 @@
-build-arch := $(shell uname -m | sed 's/^i.86$$/i386/' | sed 's/^arm.*$$/arm/')
+build-arch := $(shell uname -m \
+	| sed 's/^i.86$$/i386/' \
+	| sed 's/^arm.*$$/arm/' \
+	| sed 's/ppc/powerpc/')
+
 ifeq (Power,$(filter Power,$(build-arch)))
 	build-arch = powerpc
 endif
-
-build-platform = $(shell uname -s | tr [:upper:] [:lower:])
 
 build-platform = \
 	$(shell uname -s | tr [:upper:] [:lower:] \
@@ -106,7 +108,7 @@ cflags = $(common-cflags) \
 	-I"$(JAVA_HOME)/include/linux" \
 	-fvisibility=hidden -fPIC
 
-common-lflags = -lz -lm -lstdc++
+common-lflags = -lz -lm
 
 lflags = $(common-lflags) -rdynamic -lpthread -ldl
 
@@ -117,6 +119,14 @@ ifeq ($(arch),i386)
 endif
 ifeq ($(arch),powerpc)
 	pointer-size = 4
+
+	ifneq ($(arch),$(build-arch))
+		cxx = powerpc-linux-gnu-g++
+		cc = powerpc-linux-gnu-gcc
+		ar = powerpc-linux-gnu-ar
+		ranlib = powerpc-linux-gnu-ranlib
+		strip = powerpc-linux-gnu-strip
+	endif
 endif
 ifeq ($(arch),arm)
 	pointer-size = 4
