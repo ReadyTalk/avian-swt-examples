@@ -58,6 +58,9 @@
    *** JSObjectHasPropertyProc(...);
    *** JSObjectGetPropertyProc(...);
    *** JSObjectCallAsFunctionProc(...);
+   *** eventProc3(...);
+   *** eventProc7(...);
+   *** browserProc(...);
  }
 -keepclassmembers class org.eclipse.swt.printing.Printer {
    *** GtkPrinterFunc_List(...);
