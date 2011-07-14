@@ -55,6 +55,8 @@
  }
 -keepclassmembers class org.eclipse.swt.browser.WebKit {
    *** Proc(...);
+   *** JSObjectHasPropertyProc(...);
+   *** JSObjectGetPropertyProc(...);
  }
 -keepclassmembers class org.eclipse.swt.printing.Printer {
    *** GtkPrinterFunc_List(...);
