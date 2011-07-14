@@ -53,6 +53,9 @@
    *** eventProc3(...);
    *** eventProc7(...);
  }
+-keepclassmembers class org.eclipse.swt.browser.WebKit {
+   *** Proc(...);
+ }
 -keepclassmembers class org.eclipse.swt.printing.Printer {
    *** GtkPrinterFunc_List(...);
    *** GtkPrinterFunc_Default(...);
