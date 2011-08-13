@@ -189,11 +189,13 @@ ifeq ($(platform),windows)
 			proguard += -dontusemixedcaseclassnames
 		endif
 		ifeq ($(build-platform),cygwin)
-			build-lflags += -mno-cygwin
-			build-cflags += -mno-cygwin
-			lflags += -mno-cygwin
-			cflags += -mno-cygwin
 			native-path = cygpath -m
+			cxx = i686-w64-mingw32-g++
+			cc = i686-w64-mingw32-gcc
+			dlltool = i686-w64-mingw32-dlltool
+			ar = i686-w64-mingw32-ar
+			ranlib = i686-w64-mingw32-ranlib
+			strip = i686-w64-mingw32-strip
 		endif
 	endif
 
