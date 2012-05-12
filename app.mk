@@ -85,7 +85,7 @@ java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
 
-converter = $(vm-bld)/binaryToObject
+converter = $(vm-bld)/binaryToObject/binaryToObject
 
 ifeq ($(mode),fast)
 	upx = upx --best --lzma
