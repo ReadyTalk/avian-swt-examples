@@ -34,18 +34,34 @@ extern "C" {
 
 } // extern "C"
 
-EXPORT int
-main(int ac, const char** av)
+extern "C" EXPORT int
+avianMain(const char* bootLibrary, int ac, const char** av)
 {
   JavaVMInitArgs vmArgs;
   vmArgs.version = JNI_VERSION_1_2;
-  vmArgs.nOptions = 1;
+  vmArgs.nOptions = 0;
   vmArgs.ignoreUnrecognized = JNI_TRUE;
 
-  JavaVMOption options[vmArgs.nOptions];
+  JavaVMOption options[2];
   vmArgs.options = options;
 
-  options[0].optionString = const_cast<char*>("-Xbootclasspath:[bootJar]");
+  options[vmArgs.nOptions++].optionString
+    = const_cast<char*>("-Xbootclasspath:[bootJar]");
+
+  char* buffer;
+  if (bootLibrary) {
+    const char* const property = "-Davian.bootstrap=";
+    const unsigned propertySize = strlen(property);
+    const unsigned bootLibrarySize = strlen(bootLibrary);
+    buffer = static_cast<char*>(malloc(propertySize + bootLibrarySize + 1));
+    memcpy(buffer, property, propertySize);
+    memcpy(buffer + propertySize, bootLibrary, bootLibrarySize);
+    buffer[propertySize + bootLibrarySize] = 0;
+
+    vmArgs.options[vmArgs.nOptions++].optionString = buffer;
+  } else {
+    buffer = 0;
+  }
 
   JavaVM* vm;
   void* env;
@@ -78,5 +94,15 @@ main(int ac, const char** av)
 
   vm->DestroyJavaVM();
 
+  if (buffer) {
+    free(buffer);
+  }
+
   return exitCode;
+}
+
+int
+main(int ac, const char** av)
+{
+  avianMain(0, ac, av);
 }
