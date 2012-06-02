@@ -24,6 +24,9 @@ endif
 ifneq ($(mode),fast)
 	options := $(options)-$(mode)
 endif
+ifneq ($(lzma),)
+  options := $(options)-lzma
+endif
 ifeq ($(bootimage),true)
 	options := $(options)-bootimage
 endif
@@ -86,6 +89,7 @@ javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
 
 converter = $(vm-bld)/binaryToObject/binaryToObject
+lzma-encoder = $(vm-bld)/lzma/lzma
 
 ifeq ($(mode),fast)
 	upx = upx --best --lzma
@@ -259,9 +263,17 @@ vm-objects = $(bld)/vm-objects.d
 define make-vm
 	(cd $(vm) && unset MAKEFLAGS && \
 	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform) \
-		 "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)")
+		 lzma=$(lzma) "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)")
 	cd "$(base)"
 endef
+
+ifneq ($(lzma),)
+	executable-lzma = $(executable)
+	executable-nolzma = $(executable)-nolzma
+else
+	executable-lzma = $(executable)-lzma
+	executable-nolzma = $(executable)
+endif
 
 ## targets ####################################################################
 
@@ -328,7 +340,7 @@ $(vm-objects): $(vm-lib)
 	@mkdir -p $(bld)/vm
 	(cd $(bld)/vm && $(ar) x $(ar-flags) "$(base)/$(vm-lib)")
 
-$(executable): $(jar-object) $(objects) $(vm-objects)
+$(executable-nolzma): $(jar-object) $(objects) $(vm-objects)
 ifeq ($(platform),windows)
 	$(dlltool) -z $(@).def $(objects) $(bld)/vm/*
 	$(dlltool) -d $(@).def -e $(@).exp
@@ -339,3 +351,17 @@ else
 endif
 	$(strip) $(@)
 	$(upx) $(@)
+
+$(executable).so: $(jar-object) $(objects) $(vm-objects)
+	$(cc) $(jar-object) $(objects) $(bld)/vm/*.o $(lflags) -shared -o $(@)
+	$(strip) $(@)
+
+$(executable).lzma: $(executable).so
+	$(lzma-encoder) encode $(<) $(@)
+
+$(executable).o: $(executable).lzma
+	$(converter) $(<) $(@) _binary_exe_start _binary_exe_end $(platform) $(arch)
+
+$(executable-lzma): $(executable).o
+	$(cc) $(^) $(vm-bld)/lzma/load.o $(vm-bld)/LzmaDec.o $(lflags) -o $(@)
+	$(strip) $(@)

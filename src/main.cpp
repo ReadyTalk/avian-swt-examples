@@ -34,7 +34,7 @@ extern "C" {
 
 } // extern "C"
 
-int
+EXPORT int
 main(int ac, const char** av)
 {
   JavaVMInitArgs vmArgs;
