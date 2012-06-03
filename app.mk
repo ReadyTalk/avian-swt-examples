@@ -102,6 +102,8 @@ endif
 so-prefix = lib
 so-suffix = .so
 
+shared = -shared
+
 pointer-size = 8
 
 common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
@@ -162,6 +164,7 @@ ifeq ($(platform),darwin)
 	endif
 
 	so-suffix = .jnilib
+	shared = -dynamiclib
 	ifdef proguard
 		proguard += -dontusemixedcaseclassnames
 	endif
@@ -220,6 +223,8 @@ ifeq ($(platform),windows)
 		lflags = -Wl,--as-needed -L$(lib) $(common-lflags) \
 			-lws2_32 -lversion -lpsapi -lz -ljpeg -lole32 -lurlmon -luuid \
 			-lwininet -mwindows
+	else
+		shared += -Wl,--add-stdcall-alias
 	endif
 endif
 
@@ -353,7 +358,7 @@ endif
 	$(upx) $(@)
 
 $(executable).so: $(jar-object) $(objects) $(vm-objects)
-	$(cc) $(jar-object) $(objects) $(bld)/vm/*.o $(lflags) -shared -o $(@)
+	$(cc) $(jar-object) $(objects) $(bld)/vm/*.o $(lflags) $(shared) -o $(@)
 	$(strip) $(@)
 
 $(executable).lzma: $(executable).so
