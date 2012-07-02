@@ -83,7 +83,7 @@ cc = gcc $(mflag)
 ar = ar
 
 dlltool = dlltool
-proguard = $(root)/proguard4.6beta1/lib/proguard.jar
+proguard = $(root)/proguard4.8/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
@@ -182,13 +182,13 @@ ifeq ($(platform),windows)
 	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
 
 	ifeq (,$(filter mingw32 cygwin,$(build-platform)))
-		cxx = x86_64-w64-mingw32-g++ -m32 -march=i586
-		cc = x86_64-w64-mingw32-gcc -m32 -march=i586
-		dlltool = x86_64-w64-mingw32-dlltool -mi386 --as-flags=--32 
-		ar = x86_64-w64-mingw32-ar
+		cxx = i686-w64-mingw32-g++ -m32 -march=i586
+		cc = i686-w64-mingw32-gcc -m32 -march=i586
+		dlltool = i686-w64-mingw32-dlltool -mi386 --as-flags=--32 
+		ar = i686-w64-mingw32-ar
 		ar-flags = --target=pe-i386
-		ranlib = x86_64-w64-mingw32-ranlib
-		strip = x86_64-w64-mingw32-strip --strip-all
+		ranlib = i686-w64-mingw32-ranlib
+		strip = i686-w64-mingw32-strip --strip-all
 	else
 		common-cflags += "-I$(JAVA_HOME)/include/win32"
 		build-cflags = $(common-cflags) -I$(src) -mthreads
