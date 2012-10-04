@@ -29,6 +29,10 @@ ifneq ($(lzma),)
 endif
 ifeq ($(bootimage),true)
 	options := $(options)-bootimage
+	vm-targets = \
+		build/$(platform)-$(arch)$(options)/bootimage-generator \
+		build/$(platform)-$(arch)$(options)/classpath.jar \
+		build/$(platform)-$(arch)$(options)/libavian.a
 endif
 ifeq ($(heapdump),true)
 	options := $(options)-heapdump
@@ -61,7 +65,7 @@ endif
 
 root = ..
 base = $(shell pwd)
-vm = $(root)/avian
+vm = $(root)/avian-dicej
 swt = $(root)/swt/$(full-platform)/swt.jar
 src = src
 bld = build/$(full-platform)$(options)/$(name)
@@ -268,7 +272,8 @@ vm-objects = $(bld)/vm-objects.d
 define make-vm
 	(cd $(vm) && unset MAKEFLAGS && \
 	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform) \
-		 lzma=$(lzma) "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)")
+		 lzma=$(lzma) "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)" \
+		 $(vm-targets))
 	cd "$(base)"
 endef
 
