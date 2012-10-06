@@ -11,9 +11,9 @@
 #endif
 
 #if defined __MINGW32__ && ! defined __x86_64__
-#  define SYMBOL(x) binary_boot_jar_##x
+#  define PREFIX(x) x
 #else
-#  define SYMBOL(x) _binary_boot_jar_##x
+#  define PREFIX(x) _##x
 #endif
 
 // since we aren't linking against libstdc++, we must implement this
@@ -22,15 +22,55 @@ extern "C" void __cxa_pure_virtual(void) { abort(); }
 
 extern "C" {
 
-  extern const uint8_t SYMBOL(start)[];
-  extern const uint8_t SYMBOL(end)[];
+#ifdef BOOT_IMAGE
+#  define BOOTIMAGE_BIN(x) PREFIX(binary_bootimage_bin_##x)
+
+  extern const uint8_t BOOTIMAGE_BIN(start)[];
+  extern const uint8_t BOOTIMAGE_BIN(end)[];
+
+  EXPORT const uint8_t*
+  bootimageBin(unsigned* size)
+  {
+    *size = BOOTIMAGE_BIN(end) - BOOTIMAGE_BIN(start);
+    return BOOTIMAGE_BIN(start);
+  }
+
+#  define CODEIMAGE_BIN(x) PREFIX(binary_codeimage_bin_##x)
+
+  extern const uint8_t CODEIMAGE_BIN(start)[];
+  extern const uint8_t CODEIMAGE_BIN(end)[];
+
+  EXPORT const uint8_t*
+  codeimageBin(unsigned* size)
+  {
+    *size = CODEIMAGE_BIN(end) - CODEIMAGE_BIN(start);
+    return CODEIMAGE_BIN(start);
+  }
+
+#  define RESOURCES_JAR(x) PREFIX(binary_resources_jar_##x)
+
+  extern const uint8_t RESOURCES_JAR(start)[];
+  extern const uint8_t RESOURCES_JAR(end)[];
+
+  EXPORT const uint8_t*
+  resourcesJar(unsigned* size)
+  {
+    *size = RESOURCES_JAR(end) - RESOURCES_JAR(start);
+    return RESOURCES_JAR(start);
+  }
+#else // not BOOT_IMAGE
+#  define BOOT_JAR(x) PREFIX(binary_boot_jar_##x)
+
+  extern const uint8_t BOOT_JAR(start)[];
+  extern const uint8_t BOOT_JAR(end)[];
 
   EXPORT const uint8_t*
   bootJar(unsigned* size)
   {
-    *size = SYMBOL(end) - SYMBOL(start);
-    return SYMBOL(start);
+    *size = BOOT_JAR(end) - BOOT_JAR(start);
+    return BOOT_JAR(start);
   }
+#endif // not BOOT_IMAGE
 
 } // extern "C"
 
@@ -39,14 +79,15 @@ avianMain(const char* bootLibrary, int ac, const char** av)
 {
   JavaVMInitArgs vmArgs;
   vmArgs.version = JNI_VERSION_1_2;
-  vmArgs.nOptions = 0;
+  vmArgs.nOptions = 3;
   vmArgs.ignoreUnrecognized = JNI_TRUE;
 
-  JavaVMOption options[2];
+  JavaVMOption options[vmArgs.nOptions];
   vmArgs.options = options;
 
-  options[vmArgs.nOptions++].optionString
-    = const_cast<char*>("-Xbootclasspath:[bootJar]");
+  options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
+  options[1].optionString = (char*) "-Davian.codeimage=codeimageBin";
+  options[2].optionString = (char*) "-Xbootclasspath:[bootJar]:[resourcesJar]";
 
   char* buffer;
   if (bootLibrary) {

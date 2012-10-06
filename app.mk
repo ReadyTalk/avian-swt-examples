@@ -29,10 +29,17 @@ ifneq ($(lzma),)
 endif
 ifeq ($(bootimage),true)
 	options := $(options)-bootimage
+	boot-cflags = -DBOOT_IMAGE
 	vm-targets = \
 		build/$(platform)-$(arch)$(options)/bootimage-generator \
 		build/$(platform)-$(arch)$(options)/classpath.jar \
 		build/$(platform)-$(arch)$(options)/libavian.a
+	boot-objects = \
+		$(bld)/bootimage-bin.o \
+		$(bld)/codeimage-bin.o
+	resources-object = $(bld)/resources-jar.o
+else
+	boot-objects = $(jar-object)
 endif
 ifeq ($(heapdump),true)
 	options := $(options)-heapdump
@@ -50,7 +57,7 @@ ifneq ($(openjdk),)
 		options := $(options)-openjdk
 	endif
 
-	proguard-flags += -include $(vm)/openjdk.pro
+	proguard-flags += -include $(vm)/openjdk.pro -dontoptimize -dontobfuscate
 else
 	proguard-flags += -overloadaggressively	
 endif
@@ -71,6 +78,7 @@ src = src
 bld = build/$(full-platform)$(options)/$(name)
 stage1 = $(bld)/stage1
 stage2 = $(bld)/stage2
+resources = $(bld)/resources
 vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 
 ifneq ($(platform),darwin)
@@ -93,6 +101,7 @@ javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
 
 converter = $(vm-bld)/binaryToObject/binaryToObject
+bootimage-generator = $(vm-bld)/bootimage-generator
 lzma-encoder = $(vm-bld)/lzma/lzma
 
 ifeq ($(mode),fast)
@@ -110,7 +119,7 @@ shared = -shared
 
 pointer-size = 8
 
-common-cflags = -Wextra -Werror -Wunused-parameter -Winit-self \
+common-cflags = $(boot-cflags) -Wextra -Werror -Wunused-parameter -Winit-self \
 	-I"$(JAVA_HOME)/include" \
 	-fno-rtti -fno-exceptions \
 	-D__STDC_LIMIT_MACROS -D_JNI_IMPLEMENTATION_ -DMAIN_CLASS=\"$(main-class)\"
@@ -288,7 +297,11 @@ endif
 ## targets ####################################################################
 
 .PHONY: build
-build: $(executable)
+build: vm $(executable)
+
+.PHONY: vm
+vm:
+	$(make-vm)
 
 $(classes): $(sources) $(jars)
 	$(make-vm)
@@ -350,20 +363,41 @@ $(vm-objects): $(vm-lib)
 	@mkdir -p $(bld)/vm
 	(cd $(bld)/vm && $(ar) x $(ar-flags) "$(base)/$(vm-lib)")
 
-$(executable-nolzma): $(jar-object) $(objects) $(vm-objects)
+$(bld)/resources.jar: $(resources).d
+	wd=$$(pwd); cd $(resources) && jar cf $${wd}/$(bld)/resources.jar *
+
+$(bld)/resources-jar.o: $(bld)/resources.jar
+	$(converter) $(<) $(@) _binary_resources_jar_start \
+		_binary_resources_jar_end $(platform) $(arch) 1
+
+$(resources).d: $(bld)/boot.jar
+	@mkdir -p $(dir $(@))
+	rm -rf $(resources)
+	mkdir -p $(resources)
+	wd=$$(pwd); cd $(stage2) && find . -type f -not -name '*.class' \
+		| xargs tar cf - | tar xf - -C $${wd}/$(resources)
+	@touch $(@)
+
+$(bld)/bootimage-bin.o: $(bld)/boot.jar
+	$(bootimage-generator) -cp $(stage2) -bootimage $(@) \
+		-codeimage $(bld)/codeimage-bin.o
+
+$(executable-nolzma): $(boot-objects) $(objects) $(vm-objects) \
+		$(resources-object)
 ifeq ($(platform),windows)
 	$(dlltool) -z $(@).def $(objects) $(bld)/vm/*
 	$(dlltool) -d $(@).def -e $(@).exp
-	$(cc) $(@).exp $(jar-object) $(objects) $(hook-lib) $(bld)/vm/*.o \
-		$(lflags) -o $(@)
+	$(cc) $(@).exp $(boot-objects) $(objects) $(bld)/vm/*.o \
+		$(resources-object) $(lflags) -o $(@)
 else
-	$(cc) $(jar-object) $(objects) $(bld)/vm/*.o $(lflags) -o $(@)
+	$(cc) $(boot-objects) $(objects) $(bld)/vm/*.o $(resources-object) \
+		$(lflags) -o $(@)
 endif
 	$(strip) $(@)
 	$(upx) $(@)
 
-$(executable).so: $(jar-object) $(objects) $(vm-objects)
-	$(cc) $(jar-object) $(objects) $(bld)/vm/*.o $(lflags) $(shared) -o $(@)
+$(executable).so: $(boot-objects) $(objects) $(vm-objects)
+	$(cc) $(boot-objects) $(objects) $(bld)/vm/*.o $(lflags) $(shared) -o $(@)
 	$(strip) $(@)
 
 $(executable).lzma: $(executable).so
