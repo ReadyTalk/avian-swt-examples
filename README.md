@@ -1,7 +1,7 @@
 Avian SWT Examples
 ==================
 
-[![Build Status](https://travis-ci.org/terekcampbell/avian-swt-examples.png?branch=master)](https://travis-ci.org/terekcampbell/avian-swt-examples)
+[![Build Status](https://travis-ci.org/ReadyTalk/avian-swt-examples.png?branch=master)](https://travis-ci.org/ReadyTalk/avian-swt-examples)
 
 This package includes a set of three small sample applications taken
 from the Eclipse CVS repository, plus makefiles to build them as
