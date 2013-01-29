@@ -6,8 +6,10 @@
 
 #ifdef __MINGW32__
 #  define EXPORT __declspec(dllexport)
+#  define PATH_SEPARATOR ";"
 #else
 #  define EXPORT __attribute__ ((visibility("default")))
+#  define PATH_SEPARATOR ":"
 #endif
 
 #if defined __MINGW32__ && ! defined __x86_64__
@@ -87,7 +89,8 @@ avianMain(const char* bootLibrary, int ac, const char** av)
 
   options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
   options[1].optionString = (char*) "-Davian.codeimage=codeimageBin";
-  options[2].optionString = (char*) "-Xbootclasspath:[bootJar]:[resourcesJar]";
+  options[2].optionString = (char*)
+    "-Xbootclasspath:[bootJar]" PATH_SEPARATOR "[resourcesJar]";
 
   char* buffer;
   if (bootLibrary) {

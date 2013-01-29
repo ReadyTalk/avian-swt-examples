@@ -32,6 +32,7 @@ ifeq ($(bootimage),true)
 	boot-cflags = -DBOOT_IMAGE
 	vm-targets = \
 		build/$(platform)-$(arch)$(options)/bootimage-generator \
+		build/$(platform)-$(arch)$(options)/binaryToObject/binaryToObject \
 		build/$(platform)-$(arch)$(options)/classpath.jar \
 		build/$(platform)-$(arch)$(options)/libavian.a
 	boot-objects = \
@@ -364,7 +365,7 @@ $(vm-objects): $(vm-lib)
 	(cd $(bld)/vm && $(ar) x $(ar-flags) "$(base)/$(vm-lib)")
 
 $(bld)/resources.jar: $(resources).d
-	wd=$$(pwd); cd $(resources) && jar cf $${wd}/$(bld)/resources.jar *
+	cd $(resources) && jar cf ../resources.jar *
 
 $(bld)/resources-jar.o: $(bld)/resources.jar
 	$(converter) $(<) $(@) _binary_resources_jar_start \
