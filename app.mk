@@ -72,7 +72,7 @@ endif
 
 root = ..
 base = $(shell pwd)
-vm = $(root)/avian-dicej
+vm = $(root)/avian
 swt = $(root)/swt/$(full-platform)/swt.jar
 src = src
 bld = build/$(full-platform)$(options)/$(name)
