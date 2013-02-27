@@ -63,6 +63,22 @@ else
 	proguard-flags += -overloadaggressively	
 endif
 
+ifneq ($(android),)
+	options := $(options)-android
+
+	classpath-lflags = \
+		$(android)/icu4c/lib/libicui18n.a \
+		$(android)/icu4c/lib/libicuuc.a \
+		$(android)/icu4c/lib/libicudata.a \
+		$(android)/fdlibm/libfdm.a \
+		$(android)/expat/.libs/libexpat.a \
+		$(android)/openssl-upstream/libssl.a \
+		$(android)/openssl-upstream/libcrypto.a \
+		-lstdc++
+
+	proguard-flags += -include $(vm)/android.pro -dontoptimize -dontobfuscate
+endif
+
 ifneq (,$(full-platform))
 	platform = $(word 1,$(subst -, ,$(full-platform)))
 	arch = $(word 2,$(subst -, ,$(full-platform)))
@@ -129,7 +145,7 @@ cflags = $(common-cflags) \
 	-I"$(JAVA_HOME)/include/linux" \
 	-fvisibility=hidden -fPIC
 
-common-lflags = -lz -lm
+common-lflags = -lz -lm $(classpath-lflags)
 
 lflags = $(common-lflags) -rdynamic -lpthread -ldl
 
@@ -252,6 +268,21 @@ ifeq ($(mode),debug-fast)
 endif
 ifeq ($(mode),fast)
 	opt = -O3 -g3 -DNDEBUG
+	ifeq ($(use-lto),)
+		use-lto = true
+	endif
+endif
+
+ifeq ($(use-lto),true)
+# only try to use LTO when GCC 4.6.0 or greater is available
+	gcc-major := $(shell $(cc) -dumpversion | cut -f1 -d.)
+	gcc-minor := $(shell $(cc) -dumpversion | cut -f2 -d.)
+	ifeq ($(shell expr 4 \< $(gcc-major) \
+			\| \( 4 \<= $(gcc-major) \& 6 \<= $(gcc-minor) \)),1)
+		opt += -flto
+		no-lto = -fno-lto
+		lflags += $(opt)
+	endif
 endif
 
 ifdef cross-flags
@@ -283,7 +314,7 @@ define make-vm
 	(cd $(vm) && unset MAKEFLAGS && \
 	 make mode=$(mode) process=$(process) arch=$(arch) platform=$(platform) \
 		 lzma=$(lzma) "openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)" \
-		 $(vm-targets))
+		 android=$(android) $(vm-targets))
 	cd "$(base)"
 endef
 

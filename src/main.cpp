@@ -112,19 +112,21 @@ avianMain(const char* bootLibrary, int ac, const char** av)
   JNI_CreateJavaVM(&vm, &env, &vmArgs);
   JNIEnv* e = static_cast<JNIEnv*>(env);
 
-  jclass c = e->FindClass(MAIN_CLASS);
   if (not e->ExceptionCheck()) {
-    jmethodID m = e->GetStaticMethodID(c, "main", "([Ljava/lang/String;)V");
+    jclass c = e->FindClass(MAIN_CLASS);
     if (not e->ExceptionCheck()) {
-      jclass stringClass = e->FindClass("java/lang/String");
+      jmethodID m = e->GetStaticMethodID(c, "main", "([Ljava/lang/String;)V");
       if (not e->ExceptionCheck()) {
-        jobjectArray a = e->NewObjectArray(ac-1, stringClass, 0);
+        jclass stringClass = e->FindClass("java/lang/String");
         if (not e->ExceptionCheck()) {
-          for (int i = 1; i < ac; ++i) {
-            e->SetObjectArrayElement(a, i-1, e->NewStringUTF(av[i]));
-          }
+          jobjectArray a = e->NewObjectArray(ac-1, stringClass, 0);
+          if (not e->ExceptionCheck()) {
+            for (int i = 1; i < ac; ++i) {
+              e->SetObjectArrayElement(a, i-1, e->NewStringUTF(av[i]));
+            }
           
-          e->CallStaticVoidMethod(c, m, a);
+            e->CallStaticVoidMethod(c, m, a);
+          }
         }
       }
     }
