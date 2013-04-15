@@ -180,7 +180,8 @@ ifeq ($(arch),arm)
 endif
 
 ifeq ($(platform),darwin)
-	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
+	cflags = $(common-cflags) -Wno-deprecated -Wno-deprecated-declarations \
+			-I"$(JAVA_HOME)/include/darwin"
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
 	upx = :
 	strip = strip -S -x
