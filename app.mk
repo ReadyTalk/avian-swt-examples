@@ -269,9 +269,6 @@ ifeq ($(mode),debug-fast)
 endif
 ifeq ($(mode),fast)
 	opt = -O3 -g3 -DNDEBUG
-	ifeq ($(use-lto),)
-		use-lto = true
-	endif
 endif
 
 ifeq ($(use-lto),true)
