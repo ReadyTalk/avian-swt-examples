@@ -58,6 +58,7 @@
    *** JSObjectHasPropertyProc(...);
    *** JSObjectGetPropertyProc(...);
    *** JSObjectCallAsFunctionProc(...);
+   *** JSDOMEventProc(...);
    *** eventProc3(...);
    *** eventProc7(...);
    *** browserProc(...);
@@ -214,6 +215,9 @@
  }
 -keepclassmembers class org.eclipse.swt.widgets.DirectoryDialog {
    *** BrowseCallbackProc(...);
+ }
+-keepclassmembers class org.eclipse.swt.widgets.ToolBar {
+   *** MenuItemSelectedProc(...);
  }
 -keepclassmembers class org.eclipse.swt.ole.win32.OleFrame {
    *** getMsgProc(...);
