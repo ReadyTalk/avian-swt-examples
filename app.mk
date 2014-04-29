@@ -49,7 +49,8 @@ endif
 proguard-flags = \
 	$(extra-proguard-flags) \
 	-renamesourcefileattribute SourceFile \
-  -keepattributes SourceFile,LineNumberTable
+  -keepattributes SourceFile,LineNumberTable \
+	-dontoptimize
 
 ifneq ($(openjdk),)
 	ifneq ($(openjdk-src),)
@@ -58,7 +59,7 @@ ifneq ($(openjdk),)
 		options := $(options)-openjdk
 	endif
 
-	proguard-flags += -include $(vm)/openjdk.pro -dontoptimize -dontobfuscate
+	proguard-flags += -include $(vm)/openjdk.pro -dontobfuscate
 else
 	proguard-flags += -overloadaggressively	
 endif
@@ -76,7 +77,7 @@ ifneq ($(android),)
 		$(android)/openssl-upstream/libcrypto.a \
 		-lstdc++
 
-	proguard-flags += -include $(vm)/android.pro -dontoptimize -dontobfuscate
+	proguard-flags += -include $(vm)/android.pro -dontobfuscate
 endif
 
 ifneq (,$(full-platform))
@@ -112,7 +113,7 @@ cc = gcc $(mflag)
 ar = ar
 
 dlltool = dlltool
-proguard = $(root)/proguard4.8/lib/proguard.jar
+proguard = $(root)/proguard4.11/lib/proguard.jar
 java = "$(JAVA_HOME)/bin/java"
 javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
