@@ -99,7 +99,7 @@ stage2 = $(bld)/stage2
 resources = $(bld)/resources
 vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 
-ifneq ($(platform),darwin)
+ifneq ($(platform),macosx)
 	ifeq ($(arch),i386)
 		mflag = -m32
 	endif
@@ -180,7 +180,7 @@ ifeq ($(arch),arm)
   endif
 endif
 
-ifeq ($(platform),darwin)
+ifeq ($(platform),macosx)
 	cflags = $(common-cflags) -Wno-deprecated -Wno-deprecated-declarations \
 			-I"$(JAVA_HOME)/include/darwin"
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
