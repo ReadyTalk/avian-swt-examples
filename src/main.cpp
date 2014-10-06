@@ -84,7 +84,7 @@ avianMain(const char* bootLibrary, int ac, const char** av)
   vmArgs.nOptions = 3;
   vmArgs.ignoreUnrecognized = JNI_TRUE;
 
-  JavaVMOption options[vmArgs.nOptions];
+  JavaVMOption options[vmArgs.nOptions + 1];
   vmArgs.options = options;
 
   options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
