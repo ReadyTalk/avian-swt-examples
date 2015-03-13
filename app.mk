@@ -1,11 +1,9 @@
 build-arch := $(shell uname -m \
 	| sed 's/^i.86$$/i386/' \
+	| sed 's/^x86pc$$/i386/' \
+	| sed 's/amd64/x86_64/' \
 	| sed 's/^arm.*$$/arm/' \
-	| sed 's/ppc/powerpc/')
-
-ifeq (Power,$(filter Power,$(build-arch)))
-	build-arch = powerpc
-endif
+	| sed 's/aarch64/arm64/')
 
 build-platform = \
 	$(shell uname -s | tr [:upper:] [:lower:] \
@@ -25,7 +23,7 @@ ifneq ($(mode),fast)
 	options := $(options)-$(mode)
 endif
 ifneq ($(lzma),)
-  options := $(options)-lzma
+	options := $(options)-lzma
 endif
 ifeq ($(bootimage),true)
 	options := $(options)-bootimage
@@ -49,19 +47,19 @@ endif
 proguard-flags = \
 	$(extra-proguard-flags) \
 	-renamesourcefileattribute SourceFile \
-  -keepattributes SourceFile,LineNumberTable \
+	-keepattributes SourceFile,LineNumberTable \
 	-dontoptimize
 
 ifneq ($(openjdk),)
 	ifneq ($(openjdk-src),)
-	  options := $(options)-openjdk-src
+		options := $(options)-openjdk-src
 	else
 		options := $(options)-openjdk
 	endif
 
 	proguard-flags += -include $(vm)/openjdk.pro -dontobfuscate
 else
-	proguard-flags += -overloadaggressively	
+	proguard-flags += -overloadaggressively
 endif
 
 ifneq ($(android),)
@@ -123,10 +121,8 @@ bootimage-generator = $(vm-bld)/bootimage-generator
 lzma-encoder = $(vm-bld)/lzma/lzma
 
 ifeq ($(mode),fast)
-	upx = upx --best --lzma
 	strip = strip --strip-all
 else
-	upx = :
 	strip = :
 endif
 
@@ -155,41 +151,34 @@ native-path = echo
 ifeq ($(arch),i386)
 	pointer-size = 4
 endif
-ifeq ($(arch),powerpc)
-	pointer-size = 4
-
-	ifeq ($(platform),linux)
-		ifneq ($(arch),$(build-arch))
-			cxx = powerpc-linux-gnu-g++
-			cc = powerpc-linux-gnu-gcc
-			ar = powerpc-linux-gnu-ar
-			ranlib = powerpc-linux-gnu-ranlib
-			strip = powerpc-linux-gnu-strip
-		endif
-	endif
-endif
 ifeq ($(arch),arm)
 	pointer-size = 4
 
-  ifneq ($(arch),$(build-arch))
-    cxx = arm-linux-gnueabi-g++
-    cc = arm-linux-gnueabi-gcc
-    ar = arm-linux-gnueabi-ar
-    ranlib = arm-linux-gnueabi-ranlib
-    strip = arm-linux-gnueabi-strip
-  endif
+	ifneq ($(arch),$(build-arch))
+		cxx = arm-linux-gnueabi-g++
+		cc = arm-linux-gnueabi-gcc
+		ar = arm-linux-gnueabi-ar
+		ranlib = arm-linux-gnueabi-ranlib
+		strip = arm-linux-gnueabi-strip
+	endif
+endif
+ifeq ($(arch),arm64)
+	pointer-size = 8
+
+	ifneq ($(arch),$(build-arch))
+		cxx = aarch64-linux-gnu-g++
+		cc = aarch64-linux-gnu-gcc
+		ar = aarch64-linux-gnu-ar
+		ranlib = aarch64-linux-gnu-ranlib
+		strip = aarch64-linux-gnu-strip
+	endif
 endif
 
 ifeq ($(platform),macosx)
 	cflags = $(common-cflags) -Wno-deprecated -Wno-deprecated-declarations \
 			-I"$(JAVA_HOME)/include/darwin"
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
-	upx = :
 	strip = strip -S -x
-
-	ifeq ($(arch),powerpc)
-		cross-flags := -mmacosx-version-min=10.4 -arch ppc
-	endif
 
 	ifeq ($(arch),i386)
 		cross-flags := -mmacosx-version-min=10.4 -arch i386
@@ -216,7 +205,7 @@ ifeq ($(platform),windows)
 	ifeq (,$(filter mingw32 cygwin,$(build-platform)))
 		cxx = i686-w64-mingw32-g++ -m32 -march=i586
 		cc = i686-w64-mingw32-gcc -m32 -march=i586
-		dlltool = i686-w64-mingw32-dlltool -mi386 --as-flags=--32 
+		dlltool = i686-w64-mingw32-dlltool -mi386 --as-flags=--32
 		ar = i686-w64-mingw32-ar
 		ar-flags = --target=pe-i386
 		ranlib = i686-w64-mingw32-ranlib
@@ -240,7 +229,6 @@ ifeq ($(platform),windows)
 
 	ifeq ($(arch),x86_64)
 		wine-include-flags =
-		upx = :
 
 		cxx = x86_64-w64-mingw32-g++
 		cc = x86_64-w64-mingw32-gcc
@@ -425,7 +413,6 @@ else
 		$(lflags) -o $(@)
 endif
 	$(strip) $(@)
-	$(upx) $(@)
 
 $(executable).so: $(boot-objects) $(objects) $(vm-objects)
 	$(cc) $(boot-objects) $(objects) $(bld)/vm/*.o $(lflags) $(shared) -o $(@)
