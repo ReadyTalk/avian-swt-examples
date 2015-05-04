@@ -33,6 +33,11 @@ ifeq ($(bootimage),true)
 		build/$(platform)-$(arch)$(options)/binaryToObject/binaryToObject \
 		build/$(platform)-$(arch)$(options)/classpath.jar \
 		build/$(platform)-$(arch)$(options)/libavian.a
+	ifneq ($(lzma),)
+		vm-targets += \
+			build/$(platform)-$(arch)$(options)/lzma/lzma \
+			build/$(platform)-$(arch)$(options)/lzma/load.o
+	endif
 	boot-objects = \
 		$(bld)/bootimage-bin.o \
 		$(bld)/codeimage-bin.o
@@ -200,7 +205,7 @@ ifeq ($(platform),windows)
 	exe-suffix = .exe
 
 	cflags = -I$(inc) $(common-cflags)
-	lflags = -L$(lib) $(common-lflags) -lws2_32 -Wl,--kill-at -mwindows
+	lflags = -L$(lib) $(common-lflags) -lws2_32 -liphlpapi -Wl,--kill-at -mwindows
 
 	ifeq (,$(filter mingw32 cygwin,$(build-platform)))
 		cxx = i686-w64-mingw32-g++ -m32 -march=i586
@@ -393,8 +398,8 @@ $(resources).d: $(bld)/boot.jar
 	@mkdir -p $(dir $(@))
 	rm -rf $(resources)
 	mkdir -p $(resources)
-	wd=$$(pwd); cd $(stage2) && find . -type f -not -name '*.class' \
-		| xargs tar cf - | tar xf - -C $${wd}/$(resources)
+	cp -a $(stage2)/* $(resources)/
+	find $(resources) -type f -name '*.class' -exec rm '{}' \;
 	@touch $(@)
 
 $(bld)/bootimage-bin.o: $(bld)/boot.jar
@@ -414,8 +419,9 @@ else
 endif
 	$(strip) $(@)
 
-$(executable).so: $(boot-objects) $(objects) $(vm-objects)
-	$(cc) $(boot-objects) $(objects) $(bld)/vm/*.o $(lflags) $(shared) -o $(@)
+$(executable).so: $(boot-objects) $(objects) $(vm-objects) $(resources-object)
+	$(cc) $(boot-objects) $(objects) $(resources-object) $(bld)/vm/*.o \
+		$(lflags) $(shared) -o $(@)
 	$(strip) $(@)
 
 $(executable).lzma: $(executable).so
